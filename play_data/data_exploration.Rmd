@@ -1,0 +1,75 @@
+---
+title: "tianchi2017 data exploration"
+author: "Luyi Tian"
+date: "18 January 2017"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+```
+
+##查看商家的基本统计情况：
+```{r}
+shop_info <- read.csv("~/data/tianchi2017/dataset/shop_info.txt", header=FALSE)
+colnames(shop_info) = c("shop_id", "city_name", "location_id", "per_pay", "score", "comment_cnt", "shop_level", "cate_1_name", "cate_2_name", "cate_3_name")
+shop_info[is.na(shop_info)] = 0
+summary(shop_info)
+# 画图
+ggplot(data=shop_info, aes(per_pay))+geom_histogram()
+ggplot(data=shop_info, aes(score))+geom_histogram()
+ggplot(data=shop_info, aes(comment_cnt))+geom_histogram()
+ggplot(data=shop_info, aes(x=factor(score),y=per_pay, fill=factor(score)))+geom_violin()
+ggplot(data=shop_info, aes(x=factor(score),y=comment_cnt, fill=factor(score)))+geom_violin()
+```
+
+##查看用户浏览的基本情况：
+```{r, fig.width = 10, fig.height = 5}
+user_view <- read.csv("~/data/tianchi2017/dataset/user_view.txt", header=FALSE)
+colnames(user_view) = c("user_id", "shop_id", "time_stamp")
+user_view$time_stamp = as.POSIXct(user_view$time_stamp, format="%Y-%m-%d %H:%M:%S",tz=Sys.timezone())
+view_stat = table(user_view$shop_id)
+view_stat = data.frame(shop_id=as.numeric(names(view_stat)),freq=as.vector(view_stat))
+nrow(view_stat) # 有三家店没有view记录。
+
+view_shop_info = merge(shop_info, view_stat, by.x = "shop_id", by.y = "shop_id", all = TRUE)
+view_shop_info[is.na(view_shop_info)] = 0
+
+# 画图
+ggplot(data=view_shop_info, aes(x=factor(score),y=freq, fill=factor(score)))+geom_violin()
+ggplot(data=view_shop_info, aes(x=factor(score),y=log2(freq+1), fill=factor(score)))+geom_violin()
+
+ggplot(data=view_shop_info[view_shop_info$score == 2,], aes(x=factor(per_pay),y=log2(freq+1)))+geom_violin()+ggtitle("per_pay freq plot for shops with 2 star")+coord_cartesian(ylim = c(6, 16)) 
+ggplot(data=view_shop_info[view_shop_info$score == 4,], aes(x=factor(per_pay),y=log2(freq+1)))+geom_violin()+ggtitle("per_pay freq plot for shops with 4 star")+coord_cartesian(ylim = c(6, 16))
+
+ggplot(data=view_shop_info, aes(x=factor(cate_1_name),y=per_pay))+
+  geom_violin()+ggtitle("一级品类名称")+
+  theme(text=element_text(family="STKaiti",size=14),axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(data=view_shop_info, aes(x=factor(cate_2_name),y=per_pay))+
+  geom_violin()+ggtitle("二级分类名称")+
+  theme(text=element_text(family="STKaiti",size=14),axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(data=view_shop_info, aes(x=factor(cate_3_name),y=per_pay))+
+  geom_violin()+ggtitle("三级分类名称")+
+  theme(text=element_text(family="STKaiti",size=14),axis.text.x = element_text(angle = 90, hjust = 1))
+
+summary(view_stat$freq) # 得到平均的view数量
+
+# 得到view数量在平均附近的几家店
+avg_shop = view_stat[abs(view_stat$freq - 2783) < 20,"shop_id"]
+
+user_view$day_time = as.Date(user_view$time_stamp)
+
+view_time_series = data.frame(table(user_view[user_view$shop_id %in% avg_shop, c("day_time","shop_id")]))
+
+ggplot(view_time_series, aes(x=as.Date(day_time), y=Freq, col=shop_id)) + geom_line() + xlab("") + ylab("Daily Views")
+
+```
+
+
+##查看用户pay的情况：
+```{r}
+#TODO
+#哎呀数据好大
+```
