@@ -61,15 +61,22 @@ avg_shop = view_stat[abs(view_stat$freq - 2783) < 20,"shop_id"]
 
 user_view$day_time = as.Date(user_view$time_stamp)
 
-view_time_series = data.frame(table(user_view[user_view$shop_id %in% avg_shop, c("day_time","shop_id")]))
+avg_view_time_series = data.frame(table(user_view[user_view$shop_id %in% avg_shop, c("day_time","shop_id")]))
 
-ggplot(view_time_series, aes(x=as.Date(day_time), y=Freq, col=shop_id)) + geom_line() + xlab("") + ylab("Daily Views")
+ggplot(avg_view_time_series, aes(x=as.Date(day_time), y=Freq, col=shop_id)) + geom_line() + xlab("") + ylab("Daily Views")
 
+view_time_series = data.frame(table(user_view[, c("day_time","shop_id")]))
+
+ggplot(view_time_series, aes(log2(Freq+1))) + geom_histogram()
 ```
 
 
 ##查看用户pay的情况：
 ```{r}
-#TODO
 #哎呀数据好大
+user_pay <- read.csv("~/data/tianchi2017/dataset/user_pay.txt", header=FALSE)
+colnames(user_pay) = c("user_id", "shop_id", "time_stamp")
+user_pay$time_stamp = as.Date(user_pay$time_stamp)
+
+pay_time_series = data.frame(table(user_pay[, c("time_stamp","shop_id")]))
 ```
