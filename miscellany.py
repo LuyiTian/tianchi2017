@@ -34,3 +34,7 @@ def aggregate_sales_by_shop_day():
 
     # Output
     count.to_csv(data_path('sales_by_day.csv'))
+
+
+if __name__ == '__main__':
+    aggregate_sales_by_shop_day()
