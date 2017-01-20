@@ -11,7 +11,7 @@ https://tianchi.shuju.aliyun.com/competition/information.htm?spm=5176.100067.567
 
 ### 扩展数据
 
-* 天气数据，包括极端天气情况以及温度 `TODO`
+* 增加天气数据，目前还是分类型变量，根据后续建模需求看是否要加入温度。
 * ...
 
 ## 论坛问题总结：
