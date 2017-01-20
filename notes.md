@@ -12,7 +12,7 @@
 示例如下，首先引入类
 
 ```
-from corss_validation import validator
+from cross_validation import validator
 ```
 
 然后新建一个对象，fold是轮数，test_size是留出的最终测试集比例
