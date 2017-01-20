@@ -36,5 +36,4 @@ https://tianchi.shuju.aliyun.com/competition/information.htm?spm=5176.100067.567
 - config.py: data file path, constant variables with full capital name
 - /play_data: store random code or code that in dev
 
-
-
+- /dataset: 放一些已清洗好的数据可以直接拉下来用
