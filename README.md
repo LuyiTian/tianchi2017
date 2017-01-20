@@ -3,6 +3,20 @@ tianchi2017: 口碑商家客流量预测.
 
 > team keypass: hdrzwf
 
+# TODO
+
+* update cv method
+* convert all to pinyin
+* get holiday data
+* build a benchmark model (toy model)
+
+## cv requirements
+* randomly select a timepoint. get data from x days before this timepoint as training data and y days after this timepoint as testing data.
+* deal with null value for some shop
+* calculate score based on prediction results
+
+## holiday and weekend data
+* two columns csv file. first is date and second is whether it is holiday or weekend.
 
 
 ## 数据描述：
