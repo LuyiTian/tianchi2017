@@ -6,7 +6,6 @@ tianchi2017: 口碑商家客流量预测.
 # TODO
 
 * update cv method
-* convert all to pinyin
 * get holiday data
 * build a benchmark model (toy model)
 
