@@ -7,11 +7,13 @@ output: html_document
 
 ```{r}
 library(ggplot2)
+library(data.table)
+library(plotly, quietly = T)
 ```
 
 ##查看商家的基本统计情况：
 ```{r}
-shop_info <- read.csv("~/data/tianchi2017/dataset/shop_info.txt", header=FALSE)
+shop_info <- read.csv("~/tianchi2017/dataset/shop_info.txt", header=FALSE)
 colnames(shop_info) = c("shop_id", "city_name", "location_id", "per_pay", "score", "comment_cnt", "shop_level", "cate_1_name", "cate_2_name", "cate_3_name")
 shop_info[is.na(shop_info)] = 0
 summary(shop_info)
@@ -25,7 +27,7 @@ ggplot(data=shop_info, aes(x=factor(score),y=comment_cnt, fill=factor(score)))+g
 
 ##查看用户浏览的基本情况：
 ```{r, fig.width = 10, fig.height = 5}
-user_view <- read.csv("~/data/tianchi2017/dataset/user_view.txt", header=FALSE)
+user_view <- read.csv("~/tianchi2017/dataset/user_view.txt", header=FALSE)
 colnames(user_view) = c("user_id", "shop_id", "time_stamp")
 user_view$time_stamp = as.POSIXct(user_view$time_stamp, format="%Y-%m-%d %H:%M:%S",tz=Sys.timezone())
 view_stat = table(user_view$shop_id)
@@ -72,11 +74,20 @@ ggplot(view_time_series, aes(log2(Freq+1))) + geom_histogram()
 
 
 ##查看用户pay的情况：
-```{r}
+```r
 #哎呀数据好大
-user_pay <- read.csv("~/data/tianchi2017/dataset/user_pay.txt", header=FALSE)
+user_pay <- fread("~/tianchi2017/dataset/user_pay.txt", header=FALSE)
 colnames(user_pay) = c("user_id", "shop_id", "time_stamp")
 user_pay$time_stamp = as.Date(user_pay$time_stamp)
-
 pay_time_series = data.frame(table(user_pay[, c("time_stamp","shop_id")]))
+```
+
+
+##探索天气和支付的关系
+
+- 以第16家店为例
+
+```{r}
+all <- read.csv(file = '~/tianchi2017/dataset/example_weather.csv')
+plot_ly(all, y = ~pay,x = ~weather, type = 'box')
 ```
