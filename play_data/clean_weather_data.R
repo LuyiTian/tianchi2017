@@ -40,3 +40,24 @@ for(i in 1:nrow(simao)) {
     simao_new[i, ] <- strsplit(as.character(simao[i, 1]), split = ',')[[1]]
   }
 }
+# translate Chinese to pinyin
+# read the weather data
+weather <- read.csv(file = '', sep = ',')
+# dataframe -> character
+weather <- sapply(weather[, -(1:2)], as.character)
+weather <- matrix(weather, 1, 2000 * 518)
+# replace
+weather <- sub('转', '~', weather)
+final <- unique(weather)
+weather_pinyin <- rep(NA, 2000 * 518)
+for(i in 1:length(final)) {
+  choose <- which(weather == final[i, 1])
+  weather_pinyin[choose] <- final[i, 2]
+}
+
+# read citypinyin
+city_pinyin <- rep(NA, 2000)
+for(i in 1:nrow(city)) {
+  choose <- which(city == citypinyin[i, 1])
+  city_pinyin[choose] <- citypinyin[i, 2]
+}
