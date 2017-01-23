@@ -1,0 +1,73 @@
+---
+title: "impute_missing.R"
+author: "Luyi Tian"
+date: "23 January 2017"
+output: html_document
+---
+
+# load data
+```{r,echo=FALSE}
+library("imputeTS")
+day_by_sales <- read.csv("~/data/tianchi2017/dataset/day_by_sales.csv", stringsAsFactors=FALSE)
+day_by_sales$date = as.Date(day_by_sales$date)
+
+```
+
+# select all shops that has no NA in this time period
+```{r}
+sel_time_period = function(da, start = "2016-03-01", end = "2016-09-30"){
+  sel_data = da[da$date>=start & da$date<=end,]
+  sel_data = sel_data[,c(TRUE,!apply(sel_data[,-1], 2, function(x){any(is.na(x))}))]
+  sel_data
+}
+```
+
+# get score
+```{r}
+cel_score = function(real_da, pred_da){
+  return(sum(abs((real_da-pred_da)/(real_da+pred_da)))/(ncol(real_da)*nrow(real_da)))
+}
+```
+
+# evaluate the imputation method on pseudo-NA data
+```{r}
+evl_impute1 = function(sel_da, len=5:10, start_time = "2016-06-01"){
+  st = which(sel_da$date == start_time)
+  result = c()
+  for (i in len){
+    en = st+i
+    real_da = log2(sel_da[st:en,-1])
+    sel_da_na = log2(sel_da[,-1])
+    sel_da_na[st:en,] = NA
+    sel_da_na = ts(sel_da_na, frequency = 7)
+    sel_da_na = apply(sel_da_na, 2, function(x){na.kalman(x, model = "auto.arima")})
+    pred_da = sel_da_na[st:en,]
+    result = c(result, cel_score(real_da, pred_da))
+  }
+  return(result)
+}
+
+```
+
+
+```{r}
+sel_data = sel_time_period(day_by_sales,start = "2016-03-01", end = "2016-10-31")
+shop_number = c()
+predict7 = c()
+predict14 = c()
+for (i in seq(from=100,to=ncol(sel_data),by=100)){
+  sel_shop = sample(2:ncol(sel_data),i)
+  score_14 = evl_impute1(sel_data[,c(1,sel_shop)],len=14, start_time = "2016-10-17")
+  score_7 = evl_impute1(sel_data[,c(1,sel_shop)],len=7, start_time = "2016-10-24")
+  shop_number = c(shop_number,i)
+  predict7 = c(predict7,score_14)
+  predict14 = c(predict14,score_7)
+}
+
+imp_res = data.frame(shop_number=shop_number, predict7day=predict7, predit14day=predit14)
+write.csv(imp_res,file="too_simple_model.csv",row.names = FALSE)
+
+reg = lm(predict14~shop_number)
+plot(predict14~shop_number)
+abline(reg)
+```
