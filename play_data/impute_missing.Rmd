@@ -25,7 +25,7 @@ sel_time_period = function(da, start = "2016-03-01", end = "2016-09-30"){
 # get score
 ```{r}
 cel_score = function(real_da, pred_da){
-  return(sum(abs((real_da-pred_da)/(real_da+pred_da)))/(ncol(real_da)*nrow(real_da)))
+  return(sum(abs((2^real_da-2^pred_da)/(2^real_da+2^pred_da)))/(ncol(real_da)*nrow(real_da)))
 }
 ```
 
@@ -65,9 +65,22 @@ for (i in seq(from=100,to=ncol(sel_data),by=100)){
 }
 
 imp_res = data.frame(shop_number=shop_number, predict7day=predict7, predit14day=predit14)
-write.csv(imp_res,file="too_simple_model.csv",row.names = FALSE)
+write.csv(imp_res,file="too_simple_model_auto.arima.csv",row.names = FALSE)
 
 reg = lm(predict14~shop_number)
 plot(predict14~shop_number)
 abline(reg)
+```
+
+```{r}
+# auto.arima ; StructTS
+real_da = log2(sel_data[170:184,500])
+sel_da_na = log2(sel_data[,500])
+sel_da_na[170:184] = NA
+sel_da_na = ts(sel_da_na, frequency = 7)
+sel_da_na = na.kalman(sel_da_na, model = "auto.arima")
+pred_da = sel_da_na[170:184]
+
+plot(real_da,type="l")
+lines(pred_da,col="red")
 ```
