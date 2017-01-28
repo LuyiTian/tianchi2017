@@ -2,22 +2,23 @@
 import statsmodels.api as sm
 import numpy as np
 import pandas as pd
+from multiprocessing import Pool
 
 
 def __gen_para():
     """
     generate parameters for SARIMAX model
     """
-    for p in range(1, 15):
-        for q in range(1, 15):
-            for P in range(1, 15):
-                for Q in range(1, 15):
+    for p in range(2, 15):
+        for q in range(2, 15):
+            for P in range(3, 15):
+                for Q in range(3, 15):
                     yield p, q, P, Q
 
 
 def SARIMAX_predict_one(sales_ashop,
-                        predit_days,
-                        verbose=True):
+                        predit_days=14,
+                        verbose=False):
     """
     @param sales_ashop sales data for a shop
     """
@@ -41,11 +42,15 @@ def SARIMAX_predict_one(sales_ashop,
 
 def SARIMAX_predict(sales,
                     predit_days=14,
-                    verbose=True):
+                    p=4,
+                    verbose=False):
     """
     doc
     """
-    result = pd.concat([SARIMAX_predict_one(sales[[ith]], predit_days, verbose) for ith in range(len(sales.columns))], axis=1)
+    #result = pd.concat([SARIMAX_predict_one(sales[[ith]], predit_days, verbose) for ith in range(len(sales.columns))], axis=1)
+    a_pool = Pool(p)
+    result = a_pool.map(SARIMAX_predict_one, [sales[[ith]] for ith in range(len(sales.columns))])
+    result = pd.concat(result, axis=1)
     result.columns = sales.columns
     return result
 
@@ -57,6 +62,10 @@ if __name__ == '__main__':
     predit_days = 14
     sales_train = sales.ix[:-predit_days]
     sales_test = sales.ix[-predit_days:]
+    from timeit import default_timer as timer
+    start = timer()
     res = SARIMAX_predict(sales_train, predit_days)
-    print get_all_score(res, sales_test)
+    end = timer()
+    print "time used:", end - start
 
+    print get_all_score(res, sales_test)
