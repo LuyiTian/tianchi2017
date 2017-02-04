@@ -9,10 +9,10 @@ def __gen_para():
     """
     generate parameters for SARIMAX model
     """
-    for p in range(2, 15):
-        for q in range(2, 15):
-            for P in range(3, 15):
-                for Q in range(3, 15):
+    for p in range(6, 15):
+        for q in range(6, 15):
+            for P in range(2, 15):
+                for Q in range(2, 15):
                     yield p, q, P, Q
 
 
@@ -23,6 +23,7 @@ def SARIMAX_predict_one(sales_ashop,
     @param sales_ashop sales data for a shop
     """
     num_tried = 0
+    results = None
     for p, q, P, Q in __gen_para():
         try:
             mod = sm.tsa.statespace.SARIMAX(sales_ashop, trend=[1, 1], order=(p, 1, q), seasonal_order=(P, 1, Q, 7))
@@ -33,11 +34,15 @@ def SARIMAX_predict_one(sales_ashop,
     if verbose:
         print "SARIMAX finished with parameters:", p, q, P, Q
         print results.summary()
-    date_list = [i for i in pd.date_range(sales_ashop.ix[-1:].index[0], periods=predit_days+1)][1:]
-    future = pd.DataFrame(index=date_list, columns=sales_ashop.columns)
-    sales_ashop = pd.concat([sales_ashop, future])
-    pred_da = results.predict(start=date_list[0], end=date_list[-1], dynamic=True)
-    return pred_da
+    if results is not None:
+        date_list = [i for i in pd.date_range(sales_ashop.ix[-1:].index[0], periods=predit_days+1)][1:]
+        future = pd.DataFrame(index=date_list, columns=sales_ashop.columns)
+        sales_ashop = pd.concat([sales_ashop, future])
+        pred_da = results.predict(start=date_list[0], end=date_list[-1], dynamic=True)
+        return pred_da
+    else:
+        print "SARIMAX failed with parameters:", p, q, P, Q
+        print num_tried
 
 
 def SARIMAX_predict(sales,
@@ -58,7 +63,7 @@ def SARIMAX_predict(sales,
 if __name__ == '__main__':
     from utils import get_time_period, get_all_score
     sales = get_time_period(start="2016-03-01", end="2016-10-31")
-    sales = sales.ix[:, 0:5]
+    #sales = sales.ix[:, 0:5]
     predit_days = 14
     sales_train = sales.ix[:-predit_days]
     sales_test = sales.ix[-predit_days:]

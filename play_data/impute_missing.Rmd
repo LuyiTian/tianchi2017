@@ -40,7 +40,7 @@ evl_impute1 = function(sel_da, len=5:10, start_time = "2016-06-01"){
     sel_da_na = log2(sel_da[,-1])
     sel_da_na[st:en,] = NA
     sel_da_na = ts(sel_da_na, frequency = 7)
-    sel_da_na = apply(sel_da_na, 2, function(x){na.kalman(x, model = "auto.arima")})
+    sel_da_na = apply(sel_da_na, 2, function(x){na.kalman(x, model = "StructTS")})
     pred_da = sel_da_na[st:en,]
     result = c(result, cel_score(real_da, pred_da))
   }
@@ -60,12 +60,12 @@ for (i in seq(from=100,to=ncol(sel_data),by=100)){
   score_14 = evl_impute1(sel_data[,c(1,sel_shop)],len=14, start_time = "2016-10-17")
   score_7 = evl_impute1(sel_data[,c(1,sel_shop)],len=7, start_time = "2016-10-24")
   shop_number = c(shop_number,i)
-  predict7 = c(predict7,score_14)
-  predict14 = c(predict14,score_7)
+  predict7 = c(predict7,score_7)
+  predict14 = c(predict14,score_14)
 }
 
 imp_res = data.frame(shop_number=shop_number, predict7day=predict7, predit14day=predit14)
-write.csv(imp_res,file="too_simple_model_auto.arima.csv",row.names = FALSE)
+write.csv(imp_res,file="too_simple_model_StructTS.csv",row.names = FALSE)
 
 reg = lm(predict14~shop_number)
 plot(predict14~shop_number)
@@ -78,7 +78,7 @@ real_da = log2(sel_data[170:184,500])
 sel_da_na = log2(sel_data[,500])
 sel_da_na[170:184] = NA
 sel_da_na = ts(sel_da_na, frequency = 7)
-sel_da_na = na.kalman(sel_da_na, model = "auto.arima")
+sel_da_na = na.kalman(sel_da_na, model = "StructTS")
 pred_da = sel_da_na[170:184]
 
 plot(real_da,type="l")

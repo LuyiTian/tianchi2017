@@ -41,10 +41,26 @@ def get_all_score(pred_da, real_da, log2=True):
     """
     """
     if type(pred_da) is not np.ndarray:
-        p = 2**pred_da.values
+        if log2:
+            pred = 2**pred_da.values
+        else:
+            pred = pred_da.values
+    else:
+        if log2:
+            pred = 2**pred_da
+        else:
+            pred = pred_da
     if type(real_da) is not np.ndarray:
-        r = 2**real_da.values
-    return np.sum(np.abs((p-r)/(p+r)))/(pred_da.shape[0]*pred_da.shape[1])
+        if log2:
+            real = 2**real_da.values
+        else:
+            real = real_da.values
+    else:
+        if log2:
+            real = 2**real_da
+        else:
+            real = real_da
+    return np.sum(np.abs((pred-real)/(pred+real)))/(pred_da.shape[0]*pred_da.shape[1])
 
 
 if __name__ == '__main__':
