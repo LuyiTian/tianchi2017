@@ -32,6 +32,11 @@ def get_time_period(start=None,
     sel_sales = sales[start:end]
     if fillna is None:
         sel_sales = sel_sales.dropna(axis=1, how="any")
+    elif fillna is "pad":
+        sel_sales = sel_sales.fillna(axis=1, method="pad", limit=3)
+        sel_sales = sel_sales.dropna(axis=1, how="any")
+    elif fillna is "median":
+        sel_sales = sel_sales.fillna(value=np.median(sel_sales.values))
     else:
         raise NotImplementedError
     return sel_sales
